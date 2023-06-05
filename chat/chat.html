@@ -18,11 +18,11 @@
             <img class="header-logo" src="assent/Untitled-fig (1).png" alt="Logo">
             <div class="header-config">
                 <div class="header-config-user">
-                    <img src="assent/avatar/avatar1.png" alt="">
-                    <p>Alisson</p>
+                    <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
+                    <p class="userNome">Alisson</p>
                     <div class="curtida sem">
                         <ion-icon name="heart" class="curti"></ion-icon>
-                        <p>0</p>
+                        <p class="userCurtidas">0</p>
                     </div>
                 </div>
                 <div class="header-config-exit">
@@ -39,11 +39,11 @@
             <div class="main-usuarios" id="usuarios">
                 <div class="main-usuarios-config">
                     <div class="main-usuarios-config-user">
-                        <img src="assent/avatar/avatar1.png" alt="">
-                        <p>Alisson</p>
+                        <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
+                        <p class="userNome">Alisson</p>
                         <div class="curtida sem" id="coracao">
                             <ion-icon name="heart" class="curti"></ion-icon>
-                            <p>0</p>
+                            <p class="userCurtidas">0</p>
                         </div>
                     </div>
                     <div class="main-usuarios-config-exit" onclick="out()">
@@ -269,69 +269,54 @@
         
     </script>
     <script>
-        function mainUserDiv({nome, avatar}) {
-            const usersList = document.querySelector('#usuarios')
-            // Cria a div principal
-            var divPrincipal = document.createElement("div");
-            divPrincipal.classList.add("main-usuarios-config");
+        function mainUserDiv({nome, avatar, curtidas=0}) {
+            const userNome = document.querySelectorAll(".userNome")
+            const userAvatar = document.querySelectorAll(".userAvatar")
+            const userCurtidas = document.querySelectorAll(".userCurtidas")
 
-            // Cria a div do usuário
-            var divUsuario = document.createElement("div");
-            divUsuario.classList.add("main-usuarios-config-user");
+            for (const element of userNome) {
+                element.textContent = nome
+            }
 
-            // Cria a tag de imagem do usuário
-            var imgUsuario = document.createElement("img");
-            imgUsuario.src = avatar
-            imgUsuario.alt = "";
+            for (const element of userAvatar) {
+                element.src = avatar
+            }
 
-            // Cria o parágrafo com o nome do usuário
-            var pUsuario = document.createElement("p");
-            pUsuario.innerText = nome
+            for (const element of userCurtidas) {
+                element.textContent = curtidas
+            }
 
-            // Cria a div de curtida do usuário
-            var divCurtidaUsuario = document.createElement("div");
-            divCurtidaUsuario.classList.add("curtida", "sem");
+            /* userNome.forEach(element => {
+                console.log(element)
+            }); */
 
-            // Cria o ícone de coração curtido do usuário
-            var iconCurtidoUsuario = document.createElement("ion-icon");
-            iconCurtidoUsuario.name = "heart";
-            iconCurtidoUsuario.classList.add("curti");
+            /* userAvatar.forEach(element => {
+                element.textContent = avatar
+            }); */
 
-            // Cria o parágrafo com o número de curtidas do usuário
-            var pCurtidasUsuario = document.createElement("p");
-            pCurtidasUsuario.innerText = "0";
-
-            // Adiciona os elementos filhos à div de curtida do usuário
-            divCurtidaUsuario.appendChild(iconCurtidoUsuario);
-            divCurtidaUsuario.appendChild(pCurtidasUsuario);
-
-            // Adiciona os elementos filhos à div do usuário
-            divUsuario.appendChild(imgUsuario);
-            divUsuario.appendChild(pUsuario);
-            divUsuario.appendChild(divCurtidaUsuario);
-
-            // Cria a div de saída
-            var divSaida = document.createElement("div");
-            divSaida.classList.add("main-usuarios-config-exit");
-
-            // Cria o ícone de saída
-            var iconSaida = document.createElement("ion-icon");
-            iconSaida.name = "log-out-outline";
-
-            // Adiciona o ícone de saída à div de saída
-            divSaida.appendChild(iconSaida);
-
-            // Adiciona os elementos filhos à div principal
-            divPrincipal.appendChild(divUsuario);
-            divPrincipal.appendChild(divSaida);
-
-            // Adiciona a div principal ao corpo do documento HTML
-            usersList.appendChild(divPrincipal);
+            /* userCurtidas.forEach(element => {
+                element.textContent = curtidas
+            }); */
+            
         }
 
-        function userDiv({nome, avatar, id}) {
+        function userDiv({nome, avatar, id, curtidas=0}) {
+            const div = `
+                <div class="main-usuarios-user" id="id${id}">
+                    <img src="${avatar}" alt="">
+                    <p>${nome}</p>
+                    <div class="curtida sem">
+                        <ion-icon name="heart-outline" class="nocurti"></ion-icon>
+                        <ion-icon name="heart" class="curti"></ion-icon>
+                        <p>${curtidas}</p>
+                    </div>
+                </div>`
+
             const usersList = document.querySelector('#usuarios')
-            // Cria a div principal
+
+            usersList.innerHTML = div
+
+            /* // Cria a div principal
             var divPrincipal = document.createElement("div");
             divPrincipal.classList.add("main-usuarios-user");
             divPrincipal.id = id
@@ -375,7 +360,7 @@
 
             // Adiciona a div principal ao corpo do documento HTML
             usersList.appendChild(divPrincipal);
-
+            */
         }
 
         const socket = io()
@@ -386,10 +371,10 @@
             console.log(socket.id)
         })
         //id
-        const regex = /[?&]id=([^&#]*)/i
+        {const regex = /[?&]id=([^&#]*)/i
         const url = window.location.href
         const match = regex.exec(url)
-        const id = match && match[1]
+        const id = match && match[1]}
         socket.emit('identificacao', id)
 
         socket.on('pessoas conectadas', (users) => {
