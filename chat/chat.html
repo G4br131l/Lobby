@@ -46,11 +46,11 @@
                             <p class="userCurtidas">0</p>
                         </div>
                     </div>
-                    <div class="main-usuarios-config-exit" onclick="out()">
+                    <div class="main-usuarios-config-exit">
                         <ion-icon name="log-out-outline"></ion-icon>
                     </div>
                 </div>
-
+                <!--
                 <div class="main-usuarios-user">
                     <img src="assent/avatar/avatar4.png" alt="">
                     <p>Alisson</p>
@@ -146,6 +146,7 @@
                         <p>0</p>
                     </div>
                 </div>
+                -->
             </div>
             <div class="main-conversa" id="conversa_cont">
                 <div class="main-conversa-mensagens" id="conversa">
@@ -215,12 +216,12 @@
                         <p class="mensagem">Olá, tudo bem</p>
                     </div>
                 </div>
-                <div class="main-conversa-input">
+                <form class="main-conversa-input" id="form" action="">
                     <input style="display: none;" type="file" name="img" id="img">
                     <label class="imagem" for="img"><ion-icon name="image-outline"></ion-icon></label>
-                    <input class="mens" type="text" placeholder="Mensagem ...">
-                    <button class="enviar"><ion-icon name="paper-plane-outline"></ion-icon></button>
-                </div>
+                    <input class="mens" id="inputText" type="text" placeholder="Mensagem ..."><!---->
+                    <button class="enviar" id="bnt"><ion-icon name="paper-plane-outline"></ion-icon></button><!---->
+                </form>
             </div>
         </main>
     </body>
@@ -246,123 +247,35 @@
         conversaContent.style.height = 'calc(100vh - ' + alturaBarraNavegacao + 'px - 80px)';
     </script>
     <script>
-        var curtida = document.querySelectorAll('.curtida');
+    	function curtir() {
+	        var curtida = document.querySelectorAll('.curtida');
 
-        for (var i = 0; i < curtida.length; i++) {
-        curtida[i].addEventListener("click", function() {
-            if (this.classList.contains("sem")) {
-                this.classList.remove("sem");
-                this.classList.add("com");
-            } else {
-                this.classList.remove("com");
-                this.classList.add("sem");
-            }
-        });
-        }
+	        for (var i = 0; i < curtida.length; i++) {
+		        curtida[i].addEventListener("click", function() {
+		            if (this.classList.contains("sem")) {
+		                this.classList.remove("sem");
+		                this.classList.add("com");
+		            } else {
+		                this.classList.remove("com");
+		                this.classList.add("sem");
+		            }
+		        });
+	        }
+    	}
     </script>
     <script>
         var conversa = document.getElementById("conversa");
 
-        window.addEventListener("load", function() {
+        function scroll() {
             conversa.scrollTop = conversa.scrollHeight;
+        }
+
+        window.addEventListener("load", function() {
+            scroll()
         });
-        
     </script>
+    <script href="innerHTML.js"></script>
     <script>
-        function mainUserDiv({nome, avatar, curtidas=0}) {
-            const userNome = document.querySelectorAll(".userNome")
-            const userAvatar = document.querySelectorAll(".userAvatar")
-            const userCurtidas = document.querySelectorAll(".userCurtidas")
-
-            for (const element of userNome) {
-                element.textContent = nome
-            }
-
-            for (const element of userAvatar) {
-                element.src = avatar
-            }
-
-            for (const element of userCurtidas) {
-                element.textContent = curtidas
-            }
-
-            /* userNome.forEach(element => {
-                console.log(element)
-            }); */
-
-            /* userAvatar.forEach(element => {
-                element.textContent = avatar
-            }); */
-
-            /* userCurtidas.forEach(element => {
-                element.textContent = curtidas
-            }); */
-            
-        }
-
-        function userDiv({nome, avatar, id, curtidas=0}) {
-            const div = `
-                <div class="main-usuarios-user" id="id${id}">
-                    <img src="${avatar}" alt="">
-                    <p>${nome}</p>
-                    <div class="curtida sem">
-                        <ion-icon name="heart-outline" class="nocurti"></ion-icon>
-                        <ion-icon name="heart" class="curti"></ion-icon>
-                        <p>${curtidas}</p>
-                    </div>
-                </div>`
-
-            const usersList = document.querySelector('#usuarios')
-
-            usersList.innerHTML = div
-
-            /* // Cria a div principal
-            var divPrincipal = document.createElement("div");
-            divPrincipal.classList.add("main-usuarios-user");
-            divPrincipal.id = id
-
-            // Cria a tag de imagem
-            var img = document.createElement("img");
-            img.src = avatar
-            img.alt = "";
-
-            // Cria o parágrafo com o nome
-            var p = document.createElement("p");
-            p.innerText = nome
-
-            // Cria a div de curtida
-            var divCurtida = document.createElement("div");
-            divCurtida.classList.add("curtida", "sem");
-
-            // Cria o ícone de coração não curtido
-            var iconNaoCurtido = document.createElement("ion-icon");
-            iconNaoCurtido.name = "heart-outline";
-            iconNaoCurtido.classList.add("nocurti");
-
-            // Cria o ícone de coração curtido
-            var iconCurtido = document.createElement("ion-icon");
-            iconCurtido.name = "heart";
-            iconCurtido.classList.add("curti");
-
-            // Cria o parágrafo com o número de curtidas
-            var pCurtidas = document.createElement("p");
-            pCurtidas.innerText = "0";
-
-            // Adiciona os elementos filhos à div de curtida
-            divCurtida.appendChild(iconNaoCurtido);
-            divCurtida.appendChild(iconCurtido);
-            divCurtida.appendChild(pCurtidas);
-
-            // Adiciona os elementos filhos à div principal
-            divPrincipal.appendChild(img);
-            divPrincipal.appendChild(p);
-            divPrincipal.appendChild(divCurtida);
-
-            // Adiciona a div principal ao corpo do documento HTML
-            usersList.appendChild(divPrincipal);
-            */
-        }
-
         const socket = io()
         
         
@@ -371,25 +284,64 @@
             console.log(socket.id)
         })
         //id
-        {const regex = /[?&]id=([^&#]*)/i
-        const url = window.location.href
-        const match = regex.exec(url)
-        const id = match && match[1]}
-        socket.emit('identificacao', id)
+        function id() {
+        	//mudar pra hash
+        	const regex = /[?&]id=([^&#]*)/i
+	        const url = window.location.href
+	        const match = regex.exec(url)
+	        const id = match && match[1]
+	        return id
+	    }
+        socket.emit('identificacao', id())
 
         socket.on('pessoas conectadas', (users) => {
             const usersList = document.querySelector('#usuarios')
-            usersList.innerHTML = ''
+            usersList.innerHTML = '' //red
+            console.log(users)
             for (let i in users) 
                 if (users[i].socketID == socket.id) {
                     mainUserDiv(users[i])
                     break
                 }
             
-            for (let i in users)
+            for (let i in users) {
                 if (users[i].socketID != socket.id) {
                     userDiv(users[i])
                 }
+            }
+            //curtir()
         })
+
+        function envMsg(id) {
+            const mensagem = document.querySelector("#inputText").value
+            const imgForm = 'assent/avatar/avatar2.png'
+            const length = 1
+
+            if (!length){
+                socket.emit('enviar mensagem', {
+                    mensagem: mensagem,
+                    id: id,
+                    tipo: 'text'
+                })
+            } else {
+                socket.emit('enviar mensagem', {
+                    mensagem: {
+                        texto:mensagem,
+                        img: imgForm
+                    },
+                    id: id,
+                    tipo: 'img'
+                })
+            }
+        }
+
+        const form = document.getElementById("form")
+
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault()
+        	envMsg(id())
+        })
+
     </script>
 </html>

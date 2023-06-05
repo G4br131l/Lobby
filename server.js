@@ -14,6 +14,7 @@ app.use(express.static('chat'))
 
 //
 const pessoas = {}
+const mensagens = []
 //
 
 //login
@@ -67,6 +68,24 @@ sockets.on('connection', (socket) => {
         console.log(pessoas)
         
         sockets.emit('pessoas conectadas', pessoas)
+    })
+
+    socket.on('enviar mensagem', ({id , mensagem, tipo}) => {
+        if (tipo === 'texto') {
+            sockets.emit('mensagem texto', {
+                nome: pessoas[id].nome,
+                mensagem: mensagem
+            })
+        } else {
+            //como salvar a imagem no diretorio assent/imagens
+            // e como referenciar ela para o navegador
+            sockets.emit('mensagem img', {
+                nome: pessoas[id].nome,
+                mensagem: mensagem.texto,
+                img: mensagem.img//red
+            })
+        }
+        mensagens.push({id, mensagem, tipo})
     })
 
     socket.on('disconnect', () => {
