@@ -59,33 +59,53 @@ app.get('/chat',verificacao, (req, res) => {
 
 
 sockets.on('connection', (socket) => {
-    console.log(socket.id)
+    //console.log(socket.id)
 
 
     socket.on('identificacao', (id) => {
         if (pessoas[id])
             pessoas[id].socketID = socket.id
-        console.log(pessoas)
+        //console.log(pessoas)
         
         sockets.emit('pessoas conectadas', pessoas)
+
+        for (let i in mensagens) {
+            if (mensagens[i].tipo == 'texto') {
+                socket.emit('mensagem texto', mensagens[i])
+            } else {
+                socket.emit('mensagem img', mensagens[i])
+            }
+        }
     })
 
     socket.on('enviar mensagem', ({id , mensagem, tipo}) => {
         if (tipo === 'texto') {
             sockets.emit('mensagem texto', {
                 nome: pessoas[id].nome,
-                mensagem: mensagem
+                texto: mensagem,
+                id: id
             })
         } else {
             //como salvar a imagem no diretorio assent/imagens
             // e como referenciar ela para o navegador
             sockets.emit('mensagem img', {
                 nome: pessoas[id].nome,
-                mensagem: mensagem.texto,
-                img: mensagem.img//red
+                texto: mensagem.texto,
+                img: mensagem.img,//red
+                id: id
             })
         }
-        mensagens.push({id, mensagem, tipo})
+        mensagens.push({
+            id,
+            texto: mensagem,
+            tipo,
+            nome: pessoas[id].nome
+        })
+        if (mensagens.length > 60) {
+            for (let i = 0; i < 10; i++) 
+                mensagens.shift()
+        }
+        //console.table(mensagens)
     })
 
     socket.on('disconnect', () => {

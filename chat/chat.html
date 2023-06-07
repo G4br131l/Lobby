@@ -150,6 +150,7 @@
             </div>
             <div class="main-conversa" id="conversa_cont">
                 <div class="main-conversa-mensagens" id="conversa">
+                <!--
                     <div class="main-conversa-mensagens-mensagem seu text">
                         <p class="nome">Alisson</p>
                         <p class="mensagem">Olá, tudo bem</p>
@@ -215,6 +216,7 @@
                         <p class="nome">Alisson</p>
                         <p class="mensagem">Olá, tudo bem</p>
                     </div>
+                -->
                 </div>
                 <form class="main-conversa-input" id="form" action="">
                     <input style="display: none;" type="file" name="img" id="img">
@@ -274,7 +276,98 @@
             scroll()
         });
     </script>
-    <script href="innerHTML.js"></script>
+    <script> // href="innerHTML.js"
+        function mainUserDiv({nome, avatar, curtidas=0}) {
+            const userNome = document.querySelectorAll(".userNome")
+            const userAvatar = document.querySelectorAll(".userAvatar")
+            const userCurtidas = document.querySelectorAll(".userCurtidas")
+
+            for (const element of userNome) {
+                element.textContent = nome
+            }
+
+            for (const element of userAvatar) {
+                element.src = avatar
+            }
+
+            for (const element of userCurtidas) {
+                element.textContent = curtidas
+            }
+            
+            /*
+            userNome.forEach(element => {
+                element.textContent = nome
+            }); 
+
+            userAvatar.forEach(element => {
+                element.textContent = avatar
+            }); 
+
+            userCurtidas.forEach(element => {
+                element.textContent = curtidas
+            });
+            */
+        }
+
+        function userDiv({nome, avatar, id, curtidas=0}) {
+            const div = `
+                <div class="main-usuarios-user" id="id${id}">
+                    <img src="${avatar}" alt="">
+                    <p>${nome}</p>
+                    <div class="curtida sem">
+                        <ion-icon name="heart-outline" class="nocurti"></ion-icon>
+                        <ion-icon name="heart" class="curti"></ion-icon>
+                        <p>${curtidas}</p>
+                    </div>
+                </div>`
+
+            const usersList = document.querySelector('#usuarios')
+
+            usersList.innerHTML += div  
+        }
+
+        function suaMSGtexto({nome, texto}) {
+            const msg = `
+                <div class="main-conversa-mensagens-mensagem seu text">
+                    <p class="nome">${nome}</p>
+                    <p class="mensagem">${texto}</p>
+                </div>`
+
+            conversa.innerHTML += msg
+        }
+
+        function minhaMSGtexto({nome, texto}) {
+            const msg = `
+                <div class="main-conversa-mensagens-mensagem meu text">
+                    <p class="nome">${nome}</p>
+                    <p class="mensagem">${texto}</p>
+                </div>`
+
+            conversa.innerHTML += msg
+        }
+
+        function suaMSGfoto({nome,texto, img}) {
+            const msg = `
+            <div class="main-conversa-mensagens-mensagem seu img">
+                <p class="nome">${nome}</p>
+                <img class="img" src="${img}" alt="">
+                <p class="mensagem">${texto}</p>
+            </div>`
+
+            conversa.innerHTML += msg
+        }
+
+        function minhaMSGfoto({nome, texto, img}) {
+            const msg = `
+            <div class="main-conversa-mensagens-mensagem meu img">
+                <p class="nome">${nome}</p>
+                <img class="img" src="${img}" alt="">
+                <p class="mensagem">${texto}</p>
+            </div>`
+
+            conversa.innerHTML += msg
+        }
+    </script>
     <script>
         const socket = io()
         
@@ -312,16 +405,24 @@
             //curtir()
         })
 
+        socket.on('mensagem texto', (mensagem) => {
+            if (mensagem.id == id()) {
+                minhaMSGtexto(mensagem)
+            } else {
+                suaMSGtexto(mensagem)
+            }
+        })
+
         function envMsg(id) {
             const mensagem = document.querySelector("#inputText").value
-            const imgForm = 'assent/avatar/avatar2.png'
-            const length = 1
+            //const imgForm = 'assent/avatar/avatar2.png'
+            //const length = 1
 
-            if (!length){
+            if (1){
                 socket.emit('enviar mensagem', {
                     mensagem: mensagem,
                     id: id,
-                    tipo: 'text'
+                    tipo: 'texto'
                 })
             } else {
                 socket.emit('enviar mensagem', {
@@ -341,6 +442,8 @@
         form.addEventListener("submit", (e) => {
             e.preventDefault()
         	envMsg(id())
+            const mensagem = document.querySelector("#inputText")
+            mensagem.value = ''
         })
 
     </script>
