@@ -3,14 +3,11 @@ const http = require('http')
 const socketIO = require('socket.io')
 const {v4: uuidv4} = require('uuid')
 
-/* 
-const fs = require('fs')
-const path = require('path')
- */
-
 const app = express()
 const server = http.createServer(app)
-const sockets = socketIO(server)
+const sockets = socketIO(server, {
+    maxHttpBufferSize: 10 * 1024 * 1024, // Define o tamanho máximo do payload para 10MB
+})
 
 const port = 3000
 
@@ -99,28 +96,35 @@ sockets.on('connection', (socket) => {
                 texto: mensagem,
                 id: id
             })
+            mensagens.push({
+                id,
+                texto: mensagem,
+                tipo,
+                nome: pessoas[id].nome
+            })
         } else {
             //como salvar a imagem no diretorio assent/imagens
+            const img = `data:${mensagem.img.tipo};base64,${mensagem.img.string}`
             // e como referenciar ela para o navegador
-
-            /* sockets.emit('mensagem img', {
+            sockets.emit('mensagem img', {
                 nome: pessoas[id].nome,
                 texto: mensagem.texto,
-                img: mensagem.img,//red
+                img: img,
                 id: id
-            }) */
+            })
+            mensagens.push({
+                id,
+                texto: mensagem.texto,
+                img: img,
+                tipo,
+                nome: pessoas[id].nome
+            })
         }
-        mensagens.push({
-            id,
-            texto: mensagem,
-            tipo,
-            nome: pessoas[id].nome
-        })
+        
         if (mensagens.length > 60) {
             for (let i = 0; i < 10; i++) 
                 mensagens.shift()
         }
-        //console.table(mensagens)
     })
 
     socket.on('disconnect', () => {
@@ -132,43 +136,6 @@ sockets.on('connection', (socket) => {
             }
         }
     })
-/* 
-    socket.emit('conectado', true)
-
-    socket.on('conectado', (ok) => {
-        if (!ok) {
-            for (const i in pessoas) {
-                if (pessoas[i].socketID === socket.id) {
-                    delete pessoas[i]
-                }
-            }
-        }
-
-        function remover(socket) {
-            for (const i in pessoas) {
-                if (pessoas[i].socketID === socket.id) {
-                    delete pessoas[i]
-                    console.log(i,'excluido')
-                }
-            }
-        }
-        let n = 0
-        function resposta() {
-            console.log(ok)
-
-            socket.emit('conectado', ok, (ack) => {
-
-                if (!ack && n === 3) {
-                    remover(socket.id)
-                } else if (!ack && n < 3) {
-                    n++
-                    setTimeout(resposta, 3000);
-                }
-            })
-        }
-        setTimeout(resposta, 5000)
-        
-    }) */
 })
 
 

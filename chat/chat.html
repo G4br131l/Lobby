@@ -407,6 +407,15 @@
             scroll()
         })
 
+        socket.on('mensagem img', (mensagem) => {
+            if (mensagem.id == id()) {
+                minhaMSGfoto(mensagem)
+            } else {
+                suaMSGfoto(mensagem)
+            }
+            scroll()
+        })
+
         async function envMsg(id, imagem=false) {
             const mensagem = document.querySelector("#inputText").value
 
@@ -419,7 +428,6 @@
                     })
                 }
             } else {
-                console.log(imagem)
                 socket.emit('enviar mensagem', {
                     mensagem: {
                         texto:mensagem,
@@ -444,14 +452,12 @@
 
             if (file) {
                 try {
-                    const base64String = await imageToBase64(file);
-                    //envMsg(id(), base64String)
-                    console.log(base64String); // Exibe a string base64 no console
+                    const img = await imageToBase64(file);
+                    envMsg(id(), img)
                 } catch (error) {
                     console.error(error);
                 }
             } else {
-                //
                 try {
                     envMsg(id())
                 } catch (error) {
@@ -485,7 +491,7 @@
                     URL.revokeObjectURL(imageUrl);
 
                     // Retorna a string base64
-                    resolve(base64String);
+                    resolve({string:base64String, tipo: imageFile.type});
                 })
                 .catch(error => {
                     // Em caso de erro, rejeita a promessa
