@@ -20,7 +20,7 @@
                 <div class="header-config-user">
                     <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
                     <p class="userNome">Alisson</p>
-                    <div class="curtida sem">
+                    <div class="curtida com">
                         <ion-icon name="heart" class="curti"></ion-icon>
                         <p class="userCurtidas">0</p>
                     </div>
@@ -41,7 +41,7 @@
                     <div class="main-usuarios-config-user">
                         <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
                         <p class="userNome">Alisson</p>
-                        <div class="curtida sem" id="coracao">
+                        <div class="curtida com" id="coracao">
                             <ion-icon name="heart" class="curti"></ion-icon>
                             <p class="userCurtidas">0</p>
                         </div>
@@ -293,28 +293,15 @@
             for (const element of userCurtidas) {
                 element.textContent = curtidas
             }
-            
-            /*
-            userNome.forEach(element => {
-                element.textContent = nome
-            }); 
-
-            userAvatar.forEach(element => {
-                element.textContent = avatar
-            }); 
-
-            userCurtidas.forEach(element => {
-                element.textContent = curtidas
-            });
-            */
         }
 
         function userDiv({nome, avatar, id, curtidas=0}) {
+            const estado = curtidas == 0? 'sem' : 'com'
             const div = `
                 <div class="main-usuarios-user" id="id${id}">
                     <img src="${avatar}" alt="">
                     <p>${nome}</p>
-                    <div class="curtida sem">
+                    <div class="curtida ${estado}">
                         <ion-icon name="heart-outline" class="nocurti"></ion-icon>
                         <ion-icon name="heart" class="curti"></ion-icon>
                         <p>${curtidas}</p>
@@ -390,7 +377,8 @@
         socket.on('pessoas conectadas', (users) => {
             const usersList = document.querySelector('#usuarios')
             usersList.innerHTML = '' //red
-            console.log(users)
+            let curtirs = []
+
             for (let i in users) 
                 if (users[i].socketID == socket.id) {
                     mainUserDiv(users[i])
@@ -400,9 +388,14 @@
             for (let i in users) {
                 if (users[i].socketID != socket.id) {
                     userDiv(users[i])
+
+                    let curtir = document.querySelector(`#id${i} > div.curtida`)
+                    curtirs.push(curtir)
+                    curtirs[curtirs.length-1].addEventListener('click', function() {
+                        socket.emit('curtir', `${i}`)
+                    })
                 }
             }
-            //curtir()
         })
 
         socket.on('mensagem texto', (mensagem) => {
@@ -411,40 +404,94 @@
             } else {
                 suaMSGtexto(mensagem)
             }
+            scroll()
         })
 
-        function envMsg(id) {
+        async function envMsg(id, imagem=false) {
             const mensagem = document.querySelector("#inputText").value
-            //const imgForm = 'assent/avatar/avatar2.png'
-            //const length = 1
 
-            if (1){
-                socket.emit('enviar mensagem', {
-                    mensagem: mensagem,
-                    id: id,
-                    tipo: 'texto'
-                })
+            if (!imagem) {
+                if (mensagem.trim().length > 0) {
+                    socket.emit('enviar mensagem', {
+                        mensagem: mensagem,
+                        id: id,
+                        tipo: 'texto'
+                    })
+                }
             } else {
+                console.log(imagem)
                 socket.emit('enviar mensagem', {
                     mensagem: {
                         texto:mensagem,
-                        img: imgForm
+                        img: imagem
                     },
                     id: id,
                     tipo: 'img'
                 })
             }
+
         }
 
         const form = document.getElementById("form")
 
 
-        form.addEventListener("submit", (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault()
-        	envMsg(id())
+
+            const input = document.querySelector("#img")
+
+            const file = input.files[0];
+
+            if (file) {
+                try {
+                    const base64String = await imageToBase64(file);
+                    //envMsg(id(), base64String)
+                    console.log(base64String); // Exibe a string base64 no console
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                //
+                try {
+                    envMsg(id())
+                } catch (error) {
+                    console.error(error)
+                }
+            } 
+            
+
             const mensagem = document.querySelector("#inputText")
             mensagem.value = ''
         })
 
+
+        // Função para converter a imagem em base64
+        function imageToBase64(imageFile) {
+            return new Promise((resolve, reject) => {
+                // Cria um URL temporário para a imagem
+                const imageUrl = URL.createObjectURL(imageFile);
+
+                // Requisição assíncrona para obter os dados em formato de array buffer
+                fetch(imageUrl)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => {
+                    // Converte o array buffer em uma string base64
+                    const base64String = btoa(
+                    new Uint8Array(arrayBuffer)
+                        .reduce((data, byte) => data + String.fromCharCode(byte), '')
+                    );
+
+                    // Libera o URL temporário
+                    URL.revokeObjectURL(imageUrl);
+
+                    // Retorna a string base64
+                    resolve(base64String);
+                })
+                .catch(error => {
+                    // Em caso de erro, rejeita a promessa
+                    reject(error);
+                });
+            });
+        }
     </script>
 </html>

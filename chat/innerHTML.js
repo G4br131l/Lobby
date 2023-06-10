@@ -31,11 +31,12 @@ function mainUserDiv({nome, avatar, curtidas=0}) {
 }
 
 function userDiv({nome, avatar, id, curtidas=0}) {
+    const estado = curtidas === 0? 'sem' : com
     const div = `
         <div class="main-usuarios-user" id="id${id}">
             <img src="${avatar}" alt="">
             <p>${nome}</p>
-            <div class="curtida sem">
+            <div class="curtida ${estado}">
                 <ion-icon name="heart-outline" class="nocurti"></ion-icon>
                 <ion-icon name="heart" class="curti"></ion-icon>
                 <p>${curtidas}</p>
