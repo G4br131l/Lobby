@@ -301,7 +301,7 @@
                 <div class="main-usuarios-user" id="id${id}">
                     <img src="${avatar}" alt="">
                     <p>${nome}</p>
-                    <div class="curtida ${estado}">
+                    <div class="curtida ${estado}" onclick="curtir('${id}')">
                         <ion-icon name="heart-outline" class="nocurti"></ion-icon>
                         <ion-icon name="heart" class="curti"></ion-icon>
                         <p>${curtidas}</p>
@@ -376,27 +376,25 @@
 
         socket.on('pessoas conectadas', (users) => {
             const usersList = document.querySelector('#usuarios')
-            usersList.innerHTML = '' //red
-            let curtirs = []
+            usersList.innerHTML = ''
 
-            for (let i in users) 
+            for (let i in users) {
                 if (users[i].socketID == socket.id) {
                     mainUserDiv(users[i])
                     break
                 }
-            
+            }
+
             for (let i in users) {
                 if (users[i].socketID != socket.id) {
                     userDiv(users[i])
-
-                    let curtir = document.querySelector(`#id${i} > div.curtida`)
-                    curtirs.push(curtir)
-                    curtirs[curtirs.length-1].addEventListener('click', function() {
-                        socket.emit('curtir', `${i}`)
-                    })
                 }
             }
         })
+
+        function curtir(id) {
+            socket.emit('curtir', id)
+        }
 
         socket.on('mensagem texto', (mensagem) => {
             if (mensagem.id == id()) {
@@ -468,6 +466,7 @@
 
             const mensagem = document.querySelector("#inputText")
             mensagem.value = ''
+            input.value = ''
         })
 
 
