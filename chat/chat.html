@@ -278,6 +278,25 @@
     </script>
     <script> // href="innerHTML.js"
         function mainUserDiv({nome, avatar, curtidas=0}) {
+            const div = `
+                <div class="main-usuarios-config">
+                    <div class="main-usuarios-config-user">
+                        <img src="${avatar}" alt="" class="userAvatar">
+                        <p class="userNome">${nome}</p>
+                        <div class="curtida com" id="coracao">
+                            <ion-icon name="heart" class="curti"></ion-icon>
+                            <p class="userCurtidas">${curtidas}</p>
+                        </div>
+                    </div>
+                    <div class="main-usuarios-config-exit">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                    </div>
+                </div>
+            `
+            const usersList = document.querySelector('#usuarios')
+
+            usersList.innerHTML += div 
+
             const userNome = document.querySelectorAll(".userNome")
             const userAvatar = document.querySelectorAll(".userAvatar")
             const userCurtidas = document.querySelectorAll(".userCurtidas")
@@ -357,8 +376,7 @@
     </script>
     <script>
         const socket = io()
-        
-        
+
 
         socket.on('connect',() => {
             console.log(socket.id)
@@ -467,6 +485,8 @@
             const mensagem = document.querySelector("#inputText")
             mensagem.value = ''
             input.value = ''
+            iconImg.style = "opacity: 1";
+            foto.style = "background-image: none";
         })
 
 
@@ -498,5 +518,26 @@
                 });
             });
         }
+    </script>
+    <script>
+        let foto = document.getElementById('btnImg');
+        let file = document.getElementById('img');
+        let iconImg = document.getElementById("iconimg");
+
+        file.addEventListener('change', (event) => {
+            
+            if(file.files.length <= 0) {
+                return;
+            }
+
+            let reader = new FileReader();
+
+            reader.onload = () => {
+                foto.style = "background-image: url(" + reader.result + "); background-size: cover; background-position: center;";
+                iconImg.style = "opacity: 0";
+            }
+
+            reader.readAsDataURL(file.files[0]);
+        })
     </script>
 </html>
