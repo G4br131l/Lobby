@@ -70,7 +70,9 @@ sockets.on('connection', (socket) => {
         }
         console.log(pessoas)
         
-        sockets.emit('pessoas conectadas', pessoas)
+        socket.emit('pessoas conectadas', pessoas)
+
+        socket.broadcast.emit('adicionar usuario', pessoas[id])
 
         for (let i in mensagens) {
             if (mensagens[i].tipo == 'texto') {
@@ -86,7 +88,7 @@ sockets.on('connection', (socket) => {
             pessoas[id].curtidas = 0
 
         pessoas[id].curtidas = pessoas[id].curtidas + 1
-        sockets.emit('pessoas conectadas', pessoas)
+        sockets.emit('curtir', {id, curtidas:pessoas[id].curtidas})
     })
 
     socket.on('enviar mensagem', ({id , mensagem, tipo}) => {
@@ -132,7 +134,7 @@ sockets.on('connection', (socket) => {
             if (pessoas[i].socketID === socket.id) {
                 console.log(pessoas[i] + 'excluido')
                 delete pessoas[i]
-                sockets.emit('pessoas conectadas', pessoas)
+                sockets.emit('remover usuario', i)
             }
         }
     })

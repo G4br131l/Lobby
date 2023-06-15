@@ -18,14 +18,14 @@
             <img class="header-logo" src="assent/Untitled-fig (1).png" alt="Logo">
             <div class="header-config">
                 <div class="header-config-user">
-                    <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
-                    <p class="userNome">Alisson</p>
+                    <img src="" alt="" class="userAvatar">
+                    <p class="userNome"></p>
                     <div class="curtida com">
                         <ion-icon name="heart" class="curti"></ion-icon>
-                        <p class="userCurtidas">0</p>
+                        <p class="userCurtidas"></p>
                     </div>
                 </div>
-                <div class="header-config-exit">
+                <div class="header-config-exit" onclick="location.reload()">
                     <ion-icon name="log-out-outline"></ion-icon>
                 </div>
                 <div class="header-config-menu" id="menu">
@@ -39,14 +39,14 @@
             <div class="main-usuarios" id="usuarios">
                 <div class="main-usuarios-config">
                     <div class="main-usuarios-config-user">
-                        <img src="assent/avatar/avatar1.png" alt="" class="userAvatar">
-                        <p class="userNome">Alisson</p>
+                        <img src="" alt="" class="userAvatar">
+                        <p class="userNome"></p>
                         <div class="curtida com" id="coracao">
                             <ion-icon name="heart" class="curti"></ion-icon>
-                            <p class="userCurtidas">0</p>
+                            <p class="userCurtidas"></p>
                         </div>
                     </div>
-                    <div class="main-usuarios-config-exit">
+                    <div class="main-usuarios-config-exit" onclick="location.reload()">
                         <ion-icon name="log-out-outline"></ion-icon>
                     </div>
                 </div>
@@ -221,8 +221,8 @@
                 <form class="main-conversa-input" id="form" action="">
                     <input style="display: none;" type="file" name="img" id="img">
                     <label class="imagem" for="img"><ion-icon name="image-outline"></ion-icon></label>
-                    <input class="mens" id="inputText" type="text" placeholder="Mensagem ..."><!---->
-                    <button class="enviar" id="bnt"><ion-icon name="paper-plane-outline"></ion-icon></button><!---->
+                    <input class="mens" id="inputText" type="text" placeholder="Mensagem ...">
+                    <button class="enviar" id="bnt"><ion-icon name="paper-plane-outline"></ion-icon></button>
                 </form>
             </div>
         </main>
@@ -277,8 +277,8 @@
         });
     </script>
     <script> // href="innerHTML.js"
-        function mainUserDiv({nome, avatar, curtidas=0}) {
-            const div = `
+        function mainUserDiv({nome, avatar, curtidas=0, id}) {
+            /* const div = `
                 <div class="main-usuarios-config">
                     <div class="main-usuarios-config-user">
                         <img src="${avatar}" alt="" class="userAvatar">
@@ -295,7 +295,7 @@
             `
             const usersList = document.querySelector('#usuarios')
 
-            usersList.innerHTML += div 
+            usersList.innerHTML += div  */
 
             const userNome = document.querySelectorAll(".userNome")
             const userAvatar = document.querySelectorAll(".userAvatar")
@@ -312,6 +312,15 @@
             for (const element of userCurtidas) {
                 element.textContent = curtidas
             }
+
+            const usuario = {
+                header: document.querySelector('.header-config-user > div'),
+                main: document.querySelector('.main-usuarios-config-user > div')
+            }
+
+            for (const key in usuario) {
+                usuario[key].id = `curtir${id}`
+            }
         }
 
         function userDiv({nome, avatar, id, curtidas=0}) {
@@ -323,7 +332,7 @@
                     <div class="curtida ${estado}" onclick="curtir('${id}')">
                         <ion-icon name="heart-outline" class="nocurti"></ion-icon>
                         <ion-icon name="heart" class="curti"></ion-icon>
-                        <p>${curtidas}</p>
+                        <p id="curtir${id}">${curtidas}</p>
                     </div>
                 </div>`
 
@@ -394,18 +403,52 @@
 
         socket.on('pessoas conectadas', (users) => {
             const usersList = document.querySelector('#usuarios')
-            usersList.innerHTML = ''
+            //usersList.innerHTML = ''
 
             for (let i in users) {
                 if (users[i].socketID == socket.id) {
                     mainUserDiv(users[i])
-                    break
+                } else {
+                    userDiv(users[i])
                 }
             }
+        })
 
-            for (let i in users) {
-                if (users[i].socketID != socket.id) {
-                    userDiv(users[i])
+        socket.on('adicionar usuario', usuario => {
+            userDiv(usuario)
+        })
+
+        socket.on('remover usuario', usuario => {
+            const div = document.querySelector(`#id${usuario}`)
+            div.remove()
+        })
+
+        socket.on('curtir', usuario => {
+            if (usuario.id == id()) {
+                const curtidas = {
+                    header: document.querySelector('.header-config-user > div'),
+                    main: document.querySelector('.main-usuarios-config-user > div')
+                }
+                if (curtidas.header.classList.contains("sem")) {
+                    for (const key in curtidas) {
+                        curtidas[key].classList.remove("sem");
+                        curtidas[key].classList.add("com");
+                    }
+                }
+                const userCurtidas = document.querySelectorAll(".userCurtidas")
+
+                for (const element of userCurtidas) {
+                    element.textContent = usuario.curtidas
+                }
+            } else {
+                const estado = document.querySelector(`#id${usuario.id} > div`)
+                const curtir = document.querySelector(`#curtir${usuario.id}`)
+                console.log(curtir, usuario.id, id())
+                curtir.innerHTML =  usuario.curtidas
+                console.log(estado)
+                if (/* estado && */ estado.classList.contains("sem")) {
+                    estado.classList.remove("sem")
+                    estado.classList.add("com")
                 }
             }
         })
@@ -456,8 +499,8 @@
 
         }
 
-        const form = document.getElementById("form")
 
+        const form = document.getElementById("form")
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault()
@@ -489,8 +532,6 @@
             foto.style = "background-image: none";
         })
 
-
-        // Função para converter a imagem em base64
         function imageToBase64(imageFile) {
             return new Promise((resolve, reject) => {
                 // Cria um URL temporário para a imagem
@@ -502,18 +543,15 @@
                 .then(arrayBuffer => {
                     // Converte o array buffer em uma string base64
                     const base64String = btoa(
-                    new Uint8Array(arrayBuffer)
+                        new Uint8Array(arrayBuffer)
                         .reduce((data, byte) => data + String.fromCharCode(byte), '')
                     );
 
-                    // Libera o URL temporário
                     URL.revokeObjectURL(imageUrl);
 
-                    // Retorna a string base64
                     resolve({string:base64String, tipo: imageFile.type});
                 })
                 .catch(error => {
-                    // Em caso de erro, rejeita a promessa
                     reject(error);
                 });
             });
